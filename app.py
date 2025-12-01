@@ -9,13 +9,14 @@ import numpy as np
 from pathlib import Path
 from src.auth import require_login, logout_button
 
+st.set_page_config(page_icon='♀️', page_title="♀️ SobreVIDA — Dashboard Unificado", layout="wide", initial_sidebar_state="expanded")
+
 require_login()
 
 logout_button()
 
 warnings.filterwarnings("ignore")
 
-st.set_page_config(page_icon='♀️', page_title="♀️ SobreVIDA — Dashboard Unificado", layout="wide", initial_sidebar_state="expanded")
 st.title("♀️ SobreVIDA — Violência entre Parceiros Íntimos")
 
 # -----------------------
