@@ -1,0 +1,17 @@
+[theme]
+base="light"
+primaryColor="#b85690"
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#cebdd2"
+textColor="#4c4949"
+
+[global]
+disableWidgetStateDuplicationWarning = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = false
+toolbarMode = "minimal"
+displayEnabled = false
