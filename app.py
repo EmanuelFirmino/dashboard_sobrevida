@@ -20,7 +20,6 @@ warnings.filterwarnings("ignore")
 st.title("♀️ SobreVIDA — Violência entre Parceiros Íntimos")
 
 # -----------------------
-# CONFIG: caminhos (ajuste se necessário)
 # -----------------------
 PATH_BH_DB = "./data/violencia.db"
 PATH_BH_GEO = "./data/bairros_ll.geojson"
@@ -61,16 +60,6 @@ def load_geojson(path: str, shape_col_name: str = None):
     return gj
 
 def normalize_cat_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Padroniza/renomeia colunas da tabela 'categorias' para nomes usados no app:
-      - ANOFATO (int)
-      - BAIRRO (str)
-      - TIPOVIOLENCIA (str)
-      - Quantidade (int)
-      - COR_PELE (str)  <= mapeia 'Cor Autodeclarada' ou 'COR_PELE'
-      - IDADE (float/int)  <= mapeia 'IDADE' ou 'Idade Participante'
-    Não elimina colunas adicionais.
-    """
     df = df.copy()
     colmap = {}
     cols_lower = {c.lower(): c for c in df.columns}
@@ -130,10 +119,6 @@ def normalize_cat_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def normalize_heat_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Padroniza a tabela heatmap para colunas:
-      - ANOFATO, EixoX, EixoY, X_val, Y_val, Quantidade
-    """
     df = df.copy()
     cols_lower = {c.lower(): c for c in df.columns}
     colmap = {}
@@ -183,9 +168,6 @@ def normalize_heat_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def main():
-    # -----------------------
-    # SIDEBAR: escolha da fonte (BH / POA)
-    # -----------------------
     data_source = st.sidebar.radio("Fonte dos dados", ["Belo Horizonte", "Porto Alegre"])
 
     if data_source == "Belo Horizonte":
@@ -198,9 +180,6 @@ def main():
         # POA geojson may have different property name; we'll not try to normalize property column name
         SHAPE_COL = None
 
-    # -----------------------
-    # Carregar tabelas (cada DB: heatmap, categorias, histograma)
-    # -----------------------
     try:
         raw_cat = load_sql_table(DB_PATH, "categorias")
         raw_heat = load_sql_table(DB_PATH, "heatmap")
@@ -225,17 +204,12 @@ def main():
                 hist_full = hist_full.rename(columns={hist_cols_lower[candidate]: "ANOFATO"})
                 break
 
-    # -----------------------
-    # Carregar geojson (com cache)
-    # -----------------------
     try:
         geojson_map = load_geojson(SHAPE_PATH, shape_col_name=SHAPE_COL)
     except Exception as e:
         st.error(f"Erro ao carregar GeoJSON ({SHAPE_PATH}): {e}")
         st.stop()
 
-    # -----------------------
-    # Preparar opções de filtros (baseadas na tabela padronizada)
     anos = []
     if "ANOFATO" in cat_full.columns:
         anos = sorted(cat_full["ANOFATO"].dropna().unique())
@@ -283,9 +257,7 @@ def main():
     tipos_sel = st.sidebar.multiselect("Tipo de Violência", tipos_all, default=tipos_all)
 
 
-    # Heatmap controls in sidebar (defaults: choose different X / Y)
     st.sidebar.markdown("### Heatmap — Configuração")
-    # available heatmap axes -> deduce from columns present in cat_full or heat_full
     heat_axes = []
     # prefer the canonical names if present
     possible_axes = []
@@ -295,9 +267,7 @@ def main():
         possible_axes.append("TIPOVIOLENCIA")
     if "COR_PELE" in cat_full.columns:
         possible_axes.append("COR_PELE")
-    # fallback to what's present in heat_full values (X_val/Y_val content)
     if not possible_axes:
-        # try unique values from heat_full EixoX/EixoY
         ex = heat_full["EixoX"].dropna().unique() if "EixoX" in heat_full.columns else []
         ey = heat_full["EixoY"].dropna().unique() if "EixoY" in heat_full.columns else []
         possible_axes = list(pd.unique(list(ex) + list(ey)))
@@ -320,9 +290,6 @@ def main():
         bar_choices = [c for c in cat_full.columns if cat_full[c].dtype == object][:3]
     bar_group = st.sidebar.selectbox("Agrupar por", bar_choices, index=0)
 
-    # -----------------------
-    # Aplicar filtros aos dataframes (para gráficos que dependem de todos filtros)
-    # -----------------------
     cat_df = cat_full.copy()
     # filter by anos (always)
     if "ANOFATO" in cat_df.columns:
@@ -335,7 +302,6 @@ def main():
     if "BAIRRO" in cat_df.columns and bairros_sel:
         cat_df = cat_df[cat_df["BAIRRO"].isin(bairros_sel)]
 
-    # heatmap source: use heat_full but filtered by ANOFATO and by EixoX/EixoY fields
     heat_df = heat_full.copy()
     if "ANOFATO" in heat_df.columns:
         heat_df = heat_df[heat_df["ANOFATO"].isin(anos_selecionados)]
@@ -354,18 +320,12 @@ def main():
         else:
             heat_df = pd.DataFrame(columns=["EixoX","EixoY","X_val","Y_val","Quantidade"])
 
-    # -----------------------
-    # Função utilitária layout
-    # -----------------------
     def get_columns(container, n=2):
         if layout_option == "Vertical":
             # return list of same container so with-statement will stack
             return [container] * n
         return container.columns(n)
 
-    # -----------------------
-    # RENDER: Heatmap + Bar
-    # -----------------------
     container1 = st.container()
     col1, col2 = get_columns(container1, 2)
 
@@ -409,9 +369,6 @@ def main():
         else:
             st.info("Campo selecionado para agrupamento não está disponível nos dados.")
 
-    # -----------------------
-    # PIE + HIST
-    # -----------------------
     container2 = st.container()
     col3, col4 = get_columns(container2, 2)
 
@@ -440,24 +397,18 @@ def main():
         else:
             st.info("Coluna de idade não encontrada na tabela histograma.")
 
-    # -----------------------
-    # MAPA — atualiza apenas quando ANO muda (usamos cat_full filtered apenas por ANOFATO)
-    # -----------------------
     st.header("Mapa coroplético — Casos por Bairro")
 
-    # prepare cat_for_map: load fresh full categories from DB (to ignore other filters) and filter only by anos
     cat_for_map = normalize_cat_columns(load_sql_table(DB_PATH, "categorias"))
     if "ANOFATO" in cat_for_map.columns:
         cat_for_map = cat_for_map[cat_for_map["ANOFATO"].isin(anos_selecionados)]
     total_real = int(cat_for_map["Quantidade"].sum()) if "Quantidade" in cat_for_map.columns else 0
 
-    # distribute total_real randomly across geojson features (preserve sum)
     n_features = len(geojson_map["features"])
     if n_features == 0:
         st.info("GeoJSON não contém features.")
     else:
         if total_real <= 0:
-            # fallback: generate small random values so map shows colors
             valores = np.random.randint(1, 10, size=n_features)
         else:
             valores = np.random.rand(n_features)
@@ -467,17 +418,14 @@ def main():
             if diff != 0:
                 idx = np.random.randint(0, n_features)
                 valores[idx] += diff
-            # ensure non-zero for display
             valores = [max(int(v), 1) for v in valores]
 
         # write into geojson
         for feat, v in zip(geojson_map["features"], valores):
             feat["properties"]["TotalCasos"] = int(v)
-            # ensure there is a numeric id property for Plotly; prefer existing 'ID' / 'id' / 'id_bairro'
             if "ID" not in feat["properties"] and "id" not in feat["properties"]:
                 feat["properties"].setdefault("id_bairro", feat["properties"].get("id_bairro", 0))
 
-        # choose feature id key intelligently
         sample_props = geojson_map["features"][0]["properties"]
         if "ID" in sample_props:
             featureidkey = "properties.ID"
@@ -516,9 +464,6 @@ def main():
         fig_map.update_layout(margin=dict(l=0, r=0, t=0, b=0), paper_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_map, use_container_width=True)
 
-    # -----------------------
-    # WAFFLE / SUMMARY
-    # -----------------------
     st.subheader("Prevalência dos Tipos de Violência")
     if "TIPOVIOLENCIA" in cat_df.columns:
         prev = cat_df["TIPOVIOLENCIA"].value_counts().reset_index()

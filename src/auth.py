@@ -1,15 +1,9 @@
 import streamlit as st
 
 
-# ============================
-#   CARREGAR USUÁRIOS AUTORIZADOS
-# ============================
 def load_users():
     return st.secrets.get("auth", {})
 
-# ============================
-#   TELA DE LOGIN
-# ============================
 def login_screen():
     st.title("Observatório - SobreVIDA")
 
@@ -39,18 +33,12 @@ def login_screen():
             st.error("Usuário ou senha incorretos.")
 
 
-# ============================
-#   PROTEGER O APP
-# ============================
 def require_login():
     if "logged" not in st.session_state or not st.session_state["logged"]:
         login_screen()
         st.stop()
 
 
-# ============================
-#   LOGOUT
-# ============================
 def logout_button():
     if st.sidebar.button("Logout"):
         st.session_state.clear()

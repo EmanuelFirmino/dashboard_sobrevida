@@ -1,6 +1,5 @@
 import streamlit as st
 
-# Executa JS para pegar largura da tela
 def detect_screen_size():
     st.markdown("""
         <script>
@@ -17,20 +16,16 @@ def detect_screen_size():
         </script>
     """, unsafe_allow_html=True)
 
-# Captura mensagens via Streamlit
 def screen_size_listener():
     message = st.experimental_get_query_params()
     return message
 
-# Função que retorna True para layout “mobile”
 def is_small_screen():
     return st.session_state.get("screen_width", 1920) <= 1024
     
-# Função que ativa JS e monitora
 def sync_screen_size():
     detect_screen_size()
 
-    # front-end listener
     st.markdown("""
         <script>
             window.addEventListener("message", (event) => {

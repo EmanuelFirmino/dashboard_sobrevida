@@ -5,7 +5,7 @@ INPUT = "bairros.geojson"
 OUTPUT = "bairros_ll.geojson"
 
 UTM_ZONE = 23
-SOUTH = True  # Belo Horizonte = Hemisfério Sul
+SOUTH = True 
 
 def utm_to_latlon(easting, northing, zone=23, south=True):
     a = 6378137.0
