@@ -24,7 +24,7 @@ st.title("♀️ SobreVIDA — Violência entre Parceiros Íntimos")
 PATH_BH_DB = "./data/violencia.db"
 PATH_BH_GEO = "./data/bairros_ll.geojson"
 
-PATH_POA_DB = "violencia_poa.db"
+PATH_POA_DB = "porto_alegre.db"
 PATH_POA_GEO = "./data/bairros_poa.geojson"
 
 # -----------------------

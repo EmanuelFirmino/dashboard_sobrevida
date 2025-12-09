@@ -2,7 +2,24 @@ import pandas as pd
 import sqlite3
 import numpy as np
 
-df = pd.read_csv("PortoAlegre_total/violencia_total.csv")
+df = pd.read_csv("../data/PortoAlegre_total/violencia_total.csv")
+
+domestic = ['LESAO CORPORAL', 'LESAO CORPORAL LEVE', 'AMEACA', 'ESTUPRO',
+                'VIOLENCIA PSICOL CONTRA MULHER', 'FAVORECIMENTO DA PROSTITUICAO OU DE OUTRA FORMA DE EXPLORACAO SEXUAL',
+                'FEMINICIDIO', 'OTR CRIMES CONTRA A FAMILIA', 'LESAO CORPORAL GRAVE', 'LESAO CORPORAL LEVE',
+                'FAVORECIMENTO A PROSTITUICAO (*)', 'HOMICIDIO DOLOSO']
+
+with open('atualCrimes.txt', 'w+') as file1:
+    for crime in domestic:
+        file1.write(crime)
+        file1.write('\n')
+
+with open('totalCrimes.txt', 'w+') as file2:
+    for crime in df['Desc Fato'].unique():
+        file2.write(crime)
+        file2.write('\n')
+
+df = df[df['Desc Fato'].isin(domestic)].reset_index(drop=True)
 
 df.columns = (
     df.columns.str.strip()
@@ -21,7 +38,7 @@ df.columns = (
 
 df["ano"] = df["ano_fato"].astype(int)
 df["bairro"] = df["bairro"].astype(str).str.upper().str.strip()
-df["tipo_fato"] = df["tipo_fato"].astype(str).str.upper().str.strip()
+df["tipo_fato"] = df["desc_fato"].astype(str).str.upper().str.strip()
 df["genero"] = df["genero"].astype(str).str.upper().str.strip()
 df["cor_autodeclarada"] = df["cor_autodeclarada"].astype(str).str.upper().str.strip()
 
