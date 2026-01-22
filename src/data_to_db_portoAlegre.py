@@ -2,7 +2,7 @@ import pandas as pd
 import sqlite3
 import numpy as np
 
-df = pd.read_csv("../data/PortoAlegre_total/violencia_total.csv")
+df = pd.read_excel("../data/PortoAlegre_total/dados_corrigidos.xlsx", header=1)
 
 domestic = ['LESAO CORPORAL', 'LESAO CORPORAL LEVE', 'AMEACA', 'ESTUPRO',
                 'VIOLENCIA PSICOL CONTRA MULHER', 'FAVORECIMENTO DA PROSTITUICAO OU DE OUTRA FORMA DE EXPLORACAO SEXUAL',
