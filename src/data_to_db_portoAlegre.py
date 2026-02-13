@@ -4,6 +4,7 @@ import numpy as np
 
 df = pd.read_excel("../data/PortoAlegre_total/dados_corrigidos.xlsx", header=1)
 
+df = pd.read_csv("../data/resultado.csv")
 domestic = ['LESAO CORPORAL', 'LESAO CORPORAL LEVE', 'AMEACA', 'ESTUPRO',
                 'VIOLENCIA PSICOL CONTRA MULHER', 'FAVORECIMENTO DA PROSTITUICAO OU DE OUTRA FORMA DE EXPLORACAO SEXUAL',
                 'FEMINICIDIO', 'OTR CRIMES CONTRA A FAMILIA', 'LESAO CORPORAL GRAVE', 'LESAO CORPORAL LEVE',
